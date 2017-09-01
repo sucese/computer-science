@@ -1,4 +1,4 @@
-# 数据结构：表
+# Android关于数据结构的实现：表
 
 **关于作者**
 
@@ -29,7 +29,7 @@
 
 List接口定义如下：
 
-<img src="https://github.com/guoxiaoxing/data-structure-and-algorithm/raw/master/art/list/ArrayList_class.png" width="500"/>
+<img src="https://github.com/guoxiaoxing/data-structure-and-algorithm/raw/master/art/list/ArrayList_class.png" width="800"/>
 
 ```java
 public interface List<E> extends Collection<E> {
