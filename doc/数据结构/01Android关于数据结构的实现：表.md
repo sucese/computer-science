@@ -29,7 +29,7 @@
 
 List接口定义如下：
 
-<img src="https://github.com/guoxiaoxing/data-structure-and-algorithm/raw/master/art/list/ArrayList_class.png" width="800"/>
+<img src="https://github.com/guoxiaoxing/data-structure-and-algorithm/raw/master/art/list/ArrayList_class.png"/>
 
 ```java
 public interface List<E> extends Collection<E> {
@@ -114,7 +114,7 @@ ArrayList是以数组为基础实现的线性数据结构，具体说来，它�
 
 ArrayList类图如下所示：
 
-<img src="https://github.com/guoxiaoxing/data-structure-and-algorithm/raw/master/art/list/LinkedList_class.png" width="500"/>
+<img src="https://github.com/guoxiaoxing/data-structure-and-algorithm/raw/master/art/list/LinkedList_class.png"/>
 
 实现了以下接口：
 
@@ -362,7 +362,7 @@ transient Node<E> last;
 
 原理图如下：
 
-<img src="https://github.com/guoxiaoxing/data-structure-and-algorithm/raw/master/art/list/List_ADT.png" width="500"/>
+<img src="https://github.com/guoxiaoxing/data-structure-and-algorithm/raw/master/art/list/List_ADT.png"/>
 
 ```java
 public class LinkedList<E>
@@ -477,7 +477,7 @@ linkBefore
 
 原理图如下：
 
-<img src="https://github.com/guoxiaoxing/data-structure-and-algorithm/raw/master/art/list/List_ADT.png" width="500"/>
+<img src="https://github.com/guoxiaoxing/data-structure-and-algorithm/raw/master/art/list/List_ADT.png"/>
 
 ```java
 public class LinkedList<E>
