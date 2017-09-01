@@ -192,7 +192,7 @@ private int size;
 
 #### add
 
-时间复杂度：O(n)
+时间复杂度：O(N)
 
 实现原理：ArrayList可以在指定位置增加元素，增加元素后，当前元素后面的元素都要向后移动一位。
 
@@ -275,7 +275,7 @@ public static native void arraycopy(Object src,  int  srcPos,
 
 #### remove
 
-时间复杂度：O(n)
+时间复杂度：O(N)
 
 实现原理：删除指定位置的元素，删除元素后，把该元素后面的所有元素向前移动一位
 
@@ -410,7 +410,7 @@ transient Node<E> last;
 
 #### add
 
-时间复杂度：add(E e) - O(1)，add(int index, E element) - O(n)
+时间复杂度：add(E e) - O(1)，add(int index, E element) - O(N)
 
 实现原理：增加和删除的过程都是一个针对指定节点进行前驱和后继关系修改的过程，如果是在起始节点和末尾节点插入、整个过程无需额外的遍历计算。
 如果实在中间位置插入，则需要查找当前索引的节点。
@@ -649,7 +649,7 @@ unlink
 
 #### set
 
-时间复杂度：O(n)
+时间复杂度：O(N)
 
 实现原理：查找指定index对应节点，替换掉节点里的元素，set操作也有个查找过程。
 
@@ -685,7 +685,7 @@ public class LinkedList<E>
 ```
 #### get
 
-时间复杂度：O(n)
+时间复杂度：O(N)
 
 实现原理：根据index的位置决定是从起始节点开始查找，还是从末尾节点开始查找。
 
@@ -715,3 +715,5 @@ public class LinkedList<E>
         }
     }
 }
+```
+关于表、栈与队列的内容我们就讲到这里，后续有新的内容还会在这篇文章更新。
