@@ -22,7 +22,7 @@
 >数据结构是一种存储和组织数据的方式，旨在便于访问与修改。
 
 - [01Java关于数据结构的实现：表、栈与队列](https://github.com/guoxiaoxing/data-structure-and-algorithm/blob/master/doc/数据结构/01Java关于数据结构的实现：表、栈与队列.md)
-- 02Java关于数据结构的实现：树
+- [02Java关于数据结构的实现：树](https://github.com/guoxiaoxing/data-structure-and-algorithm/blob/master/doc/数据结构/01Java关于数据结构的实现：树.md)
 - 03Java关于数据结构的实现：优先队列
 - 04Java关于数据结构的实现：图
 
