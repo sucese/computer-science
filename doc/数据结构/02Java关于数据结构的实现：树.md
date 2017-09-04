@@ -9,8 +9,8 @@
 - 一 树的概念与应用场景
     - 1.1 二叉查找树
     - 1.2 AVL树
-    - 1.3 B树
-    - 1.4 红黑树
+    - 1.3 红黑树
+    - 1.4 B树
 - 二 树的操作与源码实现
     - 2.1 TreeMap实现原理
     - 2.2 TreeSet实现原理
@@ -130,7 +130,7 @@
 另外，如果删除的次数不多，可以采用**懒惰删除**的方式，即当一个元素删除时，它仍然留在树中，只是被比较为已删除，这种方式在有重复项是特别有用，
 另外如果删除的元素又重新插入，这种方式可以避免新单元的创建开销。
 
-### 1.1 AVL树
+### 1.2 AVL树
 
 >AVL树是带有平衡条件的二叉查找树。
 
@@ -160,9 +160,11 @@ AVL树还有个平衡因子的概念，平衡因子 = 左子树高度 - 右子�
 
 查找、插入与删除在平均和最坏的情况下的时间复杂度为O(logN)。
 
-### 1.1 B树
+AVL树也是二叉查找树的一种，它的很多操作都可以向我们上面描述的二叉查找树的操作那样进行。删除操作有点例外，我们在进行删除操作
+时可以把要删除的节点向下旋转形成一个叶子节点，然后直接删除这个叶子节点，因为旋转成叶子节点期间，做多有logN个节点被旋转，每次
+AVL旋转花费的事件固定，所以删除操作的时间复杂度是O(logN)。
 
-### 1.1 红黑树
+### 1.3 红黑树
 
 >红黑树是平衡二叉树的变种，它的操作的时间复杂度是O(logN).
 
@@ -170,8 +172,44 @@ AVL树还有个平衡因子的概念，平衡因子 = 左子树高度 - 右子�
 
 - 每个节点被着成红色或者黑色
 - 根是黑色的
-- 如果一个节点是红色的，那么他额子节点必须是黑色的。
+- 如果一个节点是红色的，那么他额子节点必须是黑色的，也就是不会存在两个红色节点毗邻，一条路径上总是红黑节点交替出现。
 - 从一个节点到一个null引用的每一条路径必须包含相同数目的黑色节点。
+
+红黑树也是一种二叉查找树，查找操作与二叉查找树相同，插入与删除操作有所不同。
+
+#### 插入
+
+
+
+#### 删除
+
+### 1.4 B树
+
+>B树是一种自平衡的树，能够保持数据有序，B树为系统大块数据的读写操作做了优化，通常用在数据库与文件系统的实现上。
+
+我们前面讲解了二叉查找树、AVL树，红黑树，这三种都是典型的二叉查找树结构，其查找的事件复杂度O(logN)与树的深度有关，考虑这么一种情况，如果有
+大量的数据，而节点存储的数据有限，这种情况下，我们只能去扩充树的深度，就会导致查找效率低下。
+
+怎么解决这种问题，一个简单的想法就是：二叉变多叉。
+
+这里我们想象一下常见的文件系统，它也是一种树结构，在查找文件时，树的深度就决定了查找的效率。因此B树就是为了减少数的深度从而提高查找效率的一种
+数据结构。
+
+**主要特点**
+
+一个阶为M的B树具有以下特点：
+
+注：M阶指的是M叉查找树，例如M = 2，则为二叉查找树。
+
+- 数据项存储在树叶上
+- 非叶节点存储直到M-1个关键字以指示搜索方向：关键字代表子树i+1中最小的关键字
+- 树的根或者是一片树叶，或者其儿子数都在2和M之间。
+- 除根外，所有非树叶节点的儿子树在M/2与M之间。
+- 所有的树叶都在相同的深度上拥有的数据项都在L/2与L之间。
+
+**性能分析**
+
+B树在查找、插入以及删除等操作中，时间复杂度为O(logN)。
 
 ## 二 树的操作与源码实现
 
@@ -182,7 +220,7 @@ AVL树还有个平衡因子的概念，平衡因子 = 左子树高度 - 右子�
 
 >TreeMap是一个基于红黑树实现的集合，它可以对里面的元素进行排序。
 
-我们先来看看它的成员变量
+类的成员变量
 
 ```java
 //比较器
@@ -195,15 +233,52 @@ private transient int size = 0;
 private transient int modCount = 0;
 ```
 
+类的构造方法
+
+```java
+public TreeMap() {
+    //默认比较器
+    comparator = null;
+}
+
+public TreeMap(Comparator<? super K> comparator) {
+    //指定比较器
+    this.comparator = comparator;
+}
+
+
+public TreeMap(Map<? extends K, ? extends V> m) {
+    //默认比较器
+    comparator = null;
+    putAll(m);
+}
+
+public TreeMap(SortedMap<K, ? extends V> m) {
+    //指定比较器
+    comparator = m.comparator();
+    try {
+        buildFromSorted(m.size(), m.entrySet().iterator(), null, null);
+    } catch (java.io.IOException cannotHappen) {
+    } catch (ClassNotFoundException cannotHappen) {
+    }
+}
+```
+
 TreeMap里面定义了静态内部类TreeMapEntry来描述节点信息。
 
 ```java
    static final class TreeMapEntry<K,V> implements Map.Entry<K,V> {
+        //键
         K key;
+        //值
         V value;
+        //指向左子树的引用
         TreeMapEntry<K,V> left = null;
+        //指向右子树的引用
         TreeMapEntry<K,V> right = null;
+        //指向父节点的引用
         TreeMapEntry<K,V> parent;
+        //节点颜色，默认为黑色
         boolean color = BLACK;
 
         /**
@@ -265,6 +340,234 @@ TreeMap里面定义了静态内部类TreeMapEntry来描述节点信息。
             return key + "=" + value;
         }
     }
+```
+
+在正式介绍TreeMap里的增、删、改、查操作之前，我们先来看看TreeMop里关于节点染色，树的旋转等操作的实现，它们是TreeMap实现的基础。
+
+**节点染色**
+
+```java
+public class TreeMap<K,V>
+    extends AbstractMap<K,V>
+    implements NavigableMap<K,V>, Cloneable, java.io.Serializable{
+    
+      //染色
+      private void fixAfterInsertion(TreeMapEntry<K,V> x) {
+            x.color = RED;
+    
+            while (x != null && x != root && x.parent.color == RED) {
+                
+                //如果x节点的父节点等于
+                if (parentOf(x) == leftOf(parentOf(parentOf(x)))) {
+                    TreeMapEntry<K,V> y = rightOf(parentOf(parentOf(x)));
+                    if (colorOf(y) == RED) {
+                        setColor(parentOf(x), BLACK);
+                        setColor(y, BLACK);
+                        setColor(parentOf(parentOf(x)), RED);
+                        x = parentOf(parentOf(x));
+                    } else {
+                        if (x == rightOf(parentOf(x))) {
+                            x = parentOf(x);
+                            rotateLeft(x);
+                        }
+                        setColor(parentOf(x), BLACK);
+                        setColor(parentOf(parentOf(x)), RED);
+                        rotateRight(parentOf(parentOf(x)));
+                    }
+                } else {
+                    TreeMapEntry<K,V> y = leftOf(parentOf(parentOf(x)));
+                    if (colorOf(y) == RED) {
+                        setColor(parentOf(x), BLACK);
+                        setColor(y, BLACK);
+                        setColor(parentOf(parentOf(x)), RED);
+                        x = parentOf(parentOf(x));
+                    } else {
+                        if (x == leftOf(parentOf(x))) {
+                            x = parentOf(x);
+                            rotateRight(x);
+                        }
+                        setColor(parentOf(x), BLACK);
+                        setColor(parentOf(parentOf(x)), RED);
+                        rotateLeft(parentOf(parentOf(x)));
+                    }
+                }
+            }
+            root.color = BLACK;
+        }
+}
+```
+
+关于节点染色，我们有多种情况需要考虑。
+
+1. 若新节点位于树的根上，没有父节点，直接将其染成黑色即可。这个在代码中无需操作，因为节点默认就是黑色的。
+2. 若新节点的父节点是黑色，这个时候树依然满足红黑树的性质，并不需要额外的处理。
+3. 如果新节点的父节点是红色，且其叔父节点也为红色
+4. 如果新节点的父节点是红色，且其叔父节点为黑色或者没有叔父节点
+5. 如果新节点的父节点是红色，
+
+**树的旋转**
+
+```java
+public class TreeMap<K,V>
+    extends AbstractMap<K,V>
+    implements NavigableMap<K,V>, Cloneable, java.io.Serializable{
+    
+    //左旋
+    private void rotateLeft(TreeMapEntry<K,V> p) {
+        if (p != null) {
+            TreeMapEntry<K,V> r = p.right;
+            p.right = r.left;
+            if (r.left != null)
+                r.left.parent = p;
+            r.parent = p.parent;
+            if (p.parent == null)
+                root = r;
+            else if (p.parent.left == p)
+                p.parent.left = r;
+            else
+                p.parent.right = r;
+            r.left = p;
+            p.parent = r;
+        }
+    }
+
+    //右旋
+    private void rotateRight(TreeMapEntry<K,V> p) {
+        if (p != null) {
+            TreeMapEntry<K,V> l = p.left;
+            p.left = l.right;
+            if (l.right != null) l.right.parent = p;
+            l.parent = p.parent;
+            if (p.parent == null)
+                root = l;
+            else if (p.parent.right == p)
+                p.parent.right = l;
+            else p.parent.left = l;
+            l.right = p;
+            p.parent = l;
+        }
+    }
+}
+```
+#### put
+
+```java
+public class TreeMap<K,V>
+    extends AbstractMap<K,V>
+    implements NavigableMap<K,V>, Cloneable, java.io.Serializable{
+    
+    public V put(K key, V value) {
+            //找到根节点
+            TreeMapEntry<K,V> t = root;
+            //如果根节点为空，则设置该元素为
+            if (t == null) {
+                if (comparator != null) {
+                    if (key == null) {
+                        comparator.compare(key, key);
+                    }
+                } else {
+                    if (key == null) {
+                        throw new NullPointerException("key == null");
+                    } else if (!(key instanceof Comparable)) {
+                        throw new ClassCastException(
+                                "Cannot cast" + key.getClass().getName() + " to Comparable.");
+                    }
+                }
+    
+                root = new TreeMapEntry<>(key, value, null);
+                //集合大小为1
+                size = 1;
+                //修改次数自增
+                modCount++;
+                return null;
+            }
+            int cmp;
+            TreeMapEntry<K,V> parent;
+            //获取比较器
+            Comparator<? super K> cpr = comparator;
+            //如果比较器不空，则用指定的比较器进行比较
+            if (cpr != null) {
+                //循环递归，从根节点开始查找插入的位置，即查找的它的父节点，查找方式和我们上面讲的二叉排序树的查找方式相同
+                do {
+                    parent = t;
+                    cmp = cpr.compare(key, t.key);
+                    //插入值小于当前节点，则继续在左子树上查询
+                    if (cmp < 0)
+                        t = t.left;
+                    //插入值大于当前节点，则继续在右子树上查询
+                    else if (cmp > 0)
+                        t = t.right;
+                    //如果相等，则替换当前的值
+                    else
+                        return t.setValue(value);
+                } while (t != null);
+            }
+            //如果比较器为坤宁宫，则使用默认的比较器
+            else {
+                if (key == null)
+                    throw new NullPointerException();
+                @SuppressWarnings("unchecked")
+                    Comparable<? super K> k = (Comparable<? super K>) key;
+                do {
+                    parent = t;
+                    cmp = k.compareTo(t.key);
+                    if (cmp < 0)
+                        t = t.left;
+                    else if (cmp > 0)
+                        t = t.right;
+                    else
+                        return t.setValue(value);
+                } while (t != null);
+            }
+            //根据查找到的父节点，构造节点，并根据比结果将其插入到对应的位置
+            TreeMapEntry<K,V> e = new TreeMapEntry<>(key, value, parent);
+            if (cmp < 0)
+                parent.left = e;
+            else
+                parent.right = e;
+            //给插入的节点染色
+            fixAfterInsertion(e);
+            size++;
+            modCount++;
+            return null;
+        }
+}
+```
+
+插入操作采用了二叉排序树的查找算法，整个流程如下：
+
+1. 如果当前TreeMap没有根节点，将当前节点作为根节点插入，否则，
+2. 根据提供的比较器（如果没有提供则使用默认的比较器）进行查找比较，查找该节点的插入位置，即它的父节点的位置。
+3. 查找到父节点后，根据比较结果插入到对应位置，并进行染色处理。
+
+#### put
+
+```java
+public class TreeMap<K,V>
+    extends AbstractMap<K,V>
+    implements NavigableMap<K,V>, Cloneable, java.io.Serializable{
+    
+}
+```
+
+#### put
+
+```java
+public class TreeMap<K,V>
+    extends AbstractMap<K,V>
+    implements NavigableMap<K,V>, Cloneable, java.io.Serializable{
+    
+}
+```
+
+#### put
+
+```java
+public class TreeMap<K,V>
+    extends AbstractMap<K,V>
+    implements NavigableMap<K,V>, Cloneable, java.io.Serializable{
+    
+}
 ```
 
 ### 2.2 TreeSet实现原理
