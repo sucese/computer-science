@@ -12,13 +12,12 @@
     - 1.3 红黑树
     - 1.4 B树
 - 二 树的操作与源码实现
-    - 2.1 TreeMap实现原理
-    - 2.2 TreeSet实现原理
+    - 2.1 TreeMap/TreeSet实现原理
     
 写在前面
 
->之前在网上看到过很多关于Java集合框架实现原理文章，但大都在讲各类集合的实现，对其中数据结构的阐述的不多，例如红黑树的染色和旋转是怎么进行的等等，本篇文章从基本
-的数据结构原理出发，进一步去分析Java集合里数据结构的应用与实现。
+>之前在网上看到过很多关于Java集合框架实现原理文章，但大都在讲接口的作用与各类集合的实现，对其中数据结构的阐述的不多，例如红黑树的染色和旋转是怎么进行的等等，本篇文章从
+数据结构的基本原理出发，逐步去分析Java集合里数据结构的应用与实现。
 
 ## 一 树的概念与应用场景
 
@@ -183,11 +182,6 @@ AVL旋转花费的事件固定，所以删除操作的时间复杂度是O(logN)�
 
 红黑树也是一种二叉查找树，查找操作与二叉查找树相同，插入与删除操作有所不同。
 
-#### 插入
-
-
-#### 删除
-
 ### 1.4 B树
 
 >B树是一种自平衡的树，能够保持数据有序，B树为系统大块数据的读写操作做了优化，通常用在数据库与文件系统的实现上。
@@ -221,9 +215,11 @@ B树在查找、插入以及删除等操作中，时间复杂度为O(logN)。
 在文章[01Java关于数据结构的实现：表、栈与队列](https://github.com/guoxiaoxing/data-structure-and-algorithm/blob/master/doc/数据结构/01Java关于数据结构的实现：表、栈与队列.md)中我们
 讨论了ArrayList与LinkedList的实现，它们的瓶颈在于查找效率低下。因而Java集合设计了Set与Map接口，它们在插入、删除与查找等基本操作都有良好的表现。
 
-### 2.1 TreeMap实现原理
+### 2.1 TreeMap/TreeSet实现原理
 
->TreeMap是一个基于红黑树实现的集合，它可以对里面的元素进行排序。
+>TreeSet实际上是基于TreeMap的NavigableSet的实现，它在功能上完全依赖于TreeMap，TreeMap是一个基于红黑树实现的Map，它在存储时对元素进行排序。
+
+因此只要理解了TreeMap实现即可，TreeSet在功能上完全依赖于TreeMap。
 
 TreeMap具有以下特点：
 
@@ -794,6 +790,7 @@ public class TreeMap<K,V>
         @SuppressWarnings("unchecked")
             Comparable<? super K> k = (Comparable<? super K>) key;
         TreeMapEntry<K,V> p = root;
+        //从根节点开始查找，根据比较结果决定从左子树开始查找还是从右子树开始查找
         while (p != null) {
             int cmp = k.compareTo(p.key);
             if (cmp < 0)
@@ -807,16 +804,8 @@ public class TreeMap<K,V>
     }
 }
 ```
-
-### 2.2 TreeSet实现原理
-
-#### 成员变量
-
-#### 构造函数
-
-#### 内部类
-
-#### 操作方法
+TreeMap的查找流程和二叉查找树的查找流程是一样的，这里是从根节点开始查找，根据比较结果决定是下一步是从左子树开始查找，还是
+从右子树开始查找。
 
 
 
