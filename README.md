@@ -1,6 +1,6 @@
 # Data Structure And Algorithm
 
-<img src="https://github.com/guoxiaoxing/data-structure-and-algorithm/raw/master/art/data_structure_and_algorithm_logo.png"/>
+<img src="https://github.com/guoxiaoxing/data-structure-and-algorithm/raw/master/art/project_logo.png"/>
 
 **关于作者**
 
