@@ -14,6 +14,11 @@
 - 二 树的操作与源码实现
     - 2.1 TreeMap实现原理
     - 2.2 TreeSet实现原理
+    
+写在前面
+
+>之前在网上看到过很多关于Java集合框架实现原理文章，但大都在讲各类集合的实现，对其中数据结构的阐述的不多，例如红黑树的染色和旋转是怎么进行的等等，本篇文章从基本
+的数据结构原理出发，进一步去分析Java集合里数据结构的应用与实现。
 
 ## 一 树的概念与应用场景
 
@@ -123,9 +128,9 @@
 在二叉查找树上删除一个节点，分为三种情况：
 
 1. 若删除的是叶子节点，则不会破坏树的结构，只需要修改其双亲节点的指针即可。
-2. 若删除的节点只有左子树或右子树，主要让它的子树称为其双亲节点的子树即可，如此也不会破坏树的结构。
-3. 若删除的节点的左右子树均不为空，这种情况复杂一下，我们通常的做法是它的右子树中最小的节点代替该节点并递归删除该节点，因为右子树的最
-小节点不会有左儿子，第二次删除会容易些。具体流程可以参见上图。
+2. 若删除的节点只有一个孩子节点，则用它的孩子节点代替它的位置即可，如此也不会破坏红黑树的结构。
+3. 若删除的节点有两个孩子节点，这种情况复杂一下，我们通常会找到要删除节点X的左子树里的最大元素或者右子树里的最小元素，然后用M替换掉X，再删除节点，因为此时M最多只会有一个
+节点（如果左子树最大元素则没有右子节点，若是右子树最小元素则没有左子节点），若M没有孩子节点，直接进入情况1处理，若M只有一个孩子，则直接进入情况2处理。
 
 另外，如果删除的次数不多，可以采用**懒惰删除**的方式，即当一个元素删除时，它仍然留在树中，只是被比较为已删除，这种方式在有重复项是特别有用，
 另外如果删除的元素又重新插入，这种方式可以避免新单元的创建开销。
@@ -219,6 +224,17 @@ B树在查找、插入以及删除等操作中，时间复杂度为O(logN)。
 ### 2.1 TreeMap实现原理
 
 >TreeMap是一个基于红黑树实现的集合，它可以对里面的元素进行排序。
+
+TreeMap具有以下特点：
+
+- TreeMap是一个有序的key-value集合，基于红黑树实现。
+- 没有实现同步
+
+TreeMap实现以下接口：
+
+- NavigableMap：支持一系列导航方法，比如返回有序的key集合。
+- Cloneable：可以被克隆。
+- Serializable：支持序列化。
 
 #### 成员变量
 
@@ -498,11 +514,17 @@ public class TreeMap<K,V>
 ```
 左旋
 
+之前在网上看到一组关于左旋、右旋的动态图，很形象，这里也贴出来。
+
+<img src="https://github.com/guoxiaoxing/data-structure-and-algorithm/raw/master/art/tree/rotate_left.gif"/>
+
 1. 找到要旋转节点p的右节点r，然后将r的左子节点赋值给p的右子节点，如果r的左子节点为空，则直接将r节点设置为P的父节点。
 2. 将原来p的父节点设置成r的父节点，如果原来p的父节点为空，则直接接r设置成根节点，如果根节点不空且其做子节点为p，则将r设置为新的左子节点，如果根节点不空且其右子节点为p，则将r设置为新的右子节点，
 3. 再讲r的左子节点设为p，p的父节点设置为r，左旋完成。
 
 右旋
+
+<img src="https://github.com/guoxiaoxing/data-structure-and-algorithm/raw/master/art/tree/rotate_right.gif"/>
 
 1. 找到要旋转节点p的左子节点l，然后将l的右子节点赋值给p的左子节点，如果l的右子节点为空，则直接将l节点设置为P的父节点。
 2. 将原来p的父节点设置成l的父节点，如果原来p的父节点为空，则直接接l设置成根节点，如果根节点不空且其做子节点为p，则将l设置为新的左子节点，如果根节点不空且其右子节点为p，则将l设置为新的右子节点，
@@ -601,6 +623,41 @@ public class TreeMap<K,V>
 
 #### remove
 
+前面我们讲了插入操作，删除操作要比插入操作复杂一下，我们先来描述一下删除操作的大概流程：
+
+1. 将红黑树当成一棵二叉查找树，进行节点删除。
+2. 通过旋转和着色，使其重新变成一棵复合规则的红黑树。
+
+二叉查找树时怎么做删除的。前面我们已经说过，在二叉查找树上删除一个节点，分为三种情况：
+
+<img src="https://github.com/guoxiaoxing/data-structure-and-algorithm/raw/master/art/tree/red_black_tree_remove.png"/>
+
+1. 若删除的是叶子节点，则不会破坏树的结构，只需要修改其双亲节点的指针即可。
+2. 若删除的节点只有一个孩子节点，则用它的孩子节点代替它的位置即可，如此也不会破坏红黑树的结构。
+3. 若删除的节点有两个孩子节点，这种情况复杂一下，我们通常会找到要删除节点X的左子树里的最大元素或者右子树里的最小元素，然后用M替换掉X，再删除节点，因为此时M最多只会有一个
+节点（如果左子树最大元素则没有右子节点，若是右子树最小元素则没有左子节点），若M没有孩子节点，直接进入情况1处理，若M只有一个孩子，则直接进入情况2处理。
+
+注：这里的替换指的是值拷贝，值拷贝并不会破坏红黑树的性质。
+
+这样三种情况都可以当做第一种或者第二种情况处理。
+
+在删除节点时，我们有两个问题需要注意：
+
+- 如果删除的额是红色节点，不会违反红黑树的规则。
+- 如果删除的是黑色节点，那么这个路径上就少了一个黑色节点，则违反了红黑树规则。
+
+这样我们可以得知只有在插入的节点是黑色的时候才需要我们进行处理，具体说来：
+
+1. 若删除节点N的兄弟节点B是红色，这种情况下，先对父节点P进行左旋操作，结合对换P与B的颜色。此时左子树仍然少了一个黑色节点，此时进入情况3.
+2. 若删除节点N的父亲节点P，兄弟节点B以及B的儿子节点都是黑色，则将B染成红色，这样P到叶子节点的所有路径都包含了相同的黑色节点，但是P的父节点G到叶子节点的路径却少了
+一个黑色节点。这个时候我们要重新按照这套规则对P节点再进行一次平衡处理。
+3. 若删除节点N的父亲节点P是红色，兄弟节点B是黑色，则交换P与B颜色，这样在B所在路径上增加了一个黑色节点，弥补了已经删除的，树重新达到平衡。
+4. 若删除节点N的兄弟节点B是黑涩，B的左孩子节点BL是红色，B的右孩子节点BR是黑色，P为任意颜色。则减缓B与BL的颜色，右旋节点B。此时N所在路径并没有增加黑色节点，没有达到平衡，进入情况5.
+5. 若删除节点N的兄弟节点B是黑色，B的右孩子节点BR是红色，B的左孩子节点BL为任意颜色，P为任意颜色。则BR染成黑色，P染成黑色，B染成原来P的颜色；左旋节点，这样
+N路径上增加了一个黑色节点，B路径上少了一个黑色节点B，又增加了一个黑色节点BR，刚好达到平衡。
+
+以上的流程看起来比较复杂，本质上来说就是我们删除了一个黑色节点，破坏了当前路径黑色节点的个数，解决的方法要么为这条路径再添加一个黑色节点，要么将其他路径的黑色节点都去掉一个。
+
 ```java
 public class TreeMap<K,V>
     extends AbstractMap<K,V>
@@ -617,23 +674,25 @@ public class TreeMap<K,V>
     }
     
      private void deleteEntry(TreeMapEntry<K,V> p) {
+            //操作记录自增
             modCount++;
+            //集合大小自减
             size--;
     
-            // If strictly internal, copy successor's element to p and then make p
-            // point to successor.
+            ///如果要删除的节点p的左右子节点都不为空，则查找其替代节点并进行节点替换
             if (p.left != null && p.right != null) {
+                //查找其替代节点，替代节点为左子树的最大元素或者右子树的最小元素
                 TreeMapEntry<K,V> s = successor(p);
                 p.key = s.key;
                 p.value = s.value;
                 p = s;
             } // p has 2 children
     
-            // Start fixup at replacement node, if it exists.
+            //查找替代节点的孩子节点，replacement指的是我们图中说来的N节点，p指的是图中的
             TreeMapEntry<K,V> replacement = (p.left != null ? p.left : p.right);
-    
+            
+            //删除p，并重新建立replacement节点的连接
             if (replacement != null) {
-                // Link replacement to parent
                 replacement.parent = p.parent;
                 if (p.parent == null)
                     root = replacement;
@@ -645,7 +704,7 @@ public class TreeMap<K,V>
                 // Null out links so they are OK to use by fixAfterDeletion.
                 p.left = p.right = p.parent = null;
     
-                // Fix replacement
+                //如果删除的黑色节点，则需要重新平衡树
                 if (p.color == BLACK)
                     fixAfterDeletion(replacement);
             } else if (p.parent == null) { // return if we are the only node.
@@ -663,8 +722,57 @@ public class TreeMap<K,V>
                 }
             }
         }
+
+    //查找其替代节点，替代节点为左子树的最大元素或者右子树的最小元素
+    static <K,V> TreeMapEntry<K,V> successor(TreeMapEntry<K,V> t) {
+        if (t == null)
+            return null;
+        //查找右子树的最小元素，即最左孩子
+        else if (t.right != null) {
+            TreeMapEntry<K,V> p = t.right;
+            while (p.left != null)
+                p = p.left;
+            return p;
+        } 
+        //查找左子树的最大元素，即最右孩子
+        else {
+            TreeMapEntry<K,V> p = t.parent;
+            TreeMapEntry<K,V> ch = t;
+            while (p != null && ch == p.right) {
+                ch = p;
+                p = p.parent;
+            }
+            return p;
+        }
+    }
+
+    static <K,V> TreeMapEntry<K,V> predecessor(TreeMapEntry<K,V> t) {
+        if (t == null)
+            return null;
+        else if (t.left != null) {
+            TreeMapEntry<K,V> p = t.left;
+            while (p.right != null)
+                p = p.right;
+            return p;
+        } else {
+            TreeMapEntry<K,V> p = t.parent;
+            TreeMapEntry<K,V> ch = t;
+            while (p != null && ch == p.left) {
+                ch = p;
+                p = p.parent;s
+            }
+            return p;
+        }
+    }
 }
 ```
+
+我们再来看看deleteEntry()方法的实现流程：
+
+1. 如果要删除的节点p的左右子节点都不为空，则查找其替代节点并进行节点替换。
+2. 查找替代节点的孩子节点，replacement指的是我们图中说来的N节点，p指的是图中的M，如果p是黑色节点，则删除p后需要重新进行
+树的平衡处理。
+
 #### get
 
 ```java
