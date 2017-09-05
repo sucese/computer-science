@@ -16,10 +16,18 @@
 
 - [01Java关于数据结构的实现：表、栈与队列](https://github.com/guoxiaoxing/data-structure-and-algorithm/blob/master/doc/数据结构/01Java关于数据结构的实现：表、栈与队列.md)
 - [02Java关于数据结构的实现：树](https://github.com/guoxiaoxing/data-structure-and-algorithm/blob/master/doc/数据结构/02Java关于数据结构的实现：树.md)
-- 03Java关于数据结构的实现：优先队列
-- 04Java关于数据结构的实现：图
+- 03Java关于数据结构的实现：散列
+- 04Java关于数据结构的实现：优先队列
+- 05Java关于数据结构的实现：图
 
 ## 算法
 
 >算法描述了一个任意的计算过程，该过程以某个值或值的集合作为输入并产生某个值或值的集合作为输出，算法则就是描述一个特
 定的计算过程来实现该输入与输出的关系。
+
+- 算法实践：算法分析与摊还分析
+- 算法实践：贪婪算法
+- 算法实践：分治算法
+- 算法实践：动态规划
+- 算法实践：随机化算法
+- 算法实践：回溯算法
