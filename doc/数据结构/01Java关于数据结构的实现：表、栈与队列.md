@@ -15,6 +15,8 @@
     - 2.1 ArrayList实现原理
     - 2.2 LinkedList实现原理
 
+更多文章：https://github.com/guoxiaoxing/data-structure-and-algorithm/blob/master/README.md
+
 ## 一 数据结构与应用场景
 
 >我们将形如A1，A2，A3，A4 ... AN称之为一个表，大小为0的表我们称之为空表。
