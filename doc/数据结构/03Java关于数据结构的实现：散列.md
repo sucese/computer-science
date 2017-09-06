@@ -1,0 +1,413 @@
+# Java关于数据结构的实现：树
+
+**关于作者**
+
+>郭孝星，非著名程序员，主要从事Android平台基础架构与中间件方面的工作，欢迎交流技术方面的问题，可以去我的[Github](https://github.com/guoxiaoxing)提交Issue或者发邮件至guoxiaoxingse@163.com与我联系。
+
+**文章目录**`       
+
+- 一 散列的概念与应用场景
+    - 1.1 哈希冲突
+- 二 散列的操作与源码实现
+    - 2.1 HashMap/HashSet的实现原理
+
+## 一 散列的概念与应用场景
+
+>散列是一种对信息的处理方法，通过特定的算法将要检索的项与用来检索的索引（散列值）关联起来，生成一种便于搜索的数据结构散列表。
+
+散列的应用
+
+- 加密散列：在信息安全使用，例如SHA-1加密算法。
+- 散列表：一种使用散列喊出将键名与键值关联起来的数据结构。
+- 关联数组：一种使用散列表实现的数据结构。
+- 几何散列：查询相同或相似几何形状的一种有效方法。
+
+我们主要来讨论散列表的应用，散列值也即哈希值，提到哈希值，我们不禁会联想到Java里到hashCode()方法与equals()方法。
+
+>hashCode()方法返回该对象的哈希码值，在一次Java应用运行期间，如果该对象上equals()方法里比较的信息没有修改，则对该对象多次调用hashCode()方法时返回
+相同的整数。
+
+从这个定义我们可以了解到以下几点：
+
+- 当equals()方法被重写时，通常有必要重写hashCode()方法，以维护hashCode()方法的常规协定，该协定声明相等对象必须具有相等的哈希码。
+- hashCode的存在主要用来提升查找的快捷性，HashMap、Hashtable等用hashCode来确定散列表中对象的存储地址。
+- 两个对象相同，则两个对象的hashCode相同，反过来却不一定，hashCode相同只能说明这两个对象放在散列表里的同一个"篮子"里。
+
+我们再重写hashCode()方法时，通常用以下方式来计算hashCode：
+
+1 将一个非0的常数值保存到一个名为result的int型变量中。
+2 分别计算每个域的散列码并相加求和，散列码的生成规则如下：
+
+- byte、char、short、int: (int)(value)
+- long: (int)(value ^ (value >>> 32))
+- boolean: value == false ? 0 : 1
+- float: Float.floatToIntBits(value)
+- double: Double.doubleToLongBits(value)
+- 引用类型：value.hashCode()
+
+## 1.1 哈希冲突
+
+通过上面的描述，我们可以知道散列表主要面临的问题是散列值均匀的分布，而我们主要解决的问题是在散列值在计算的时候出现的冲突问题，即出现
+了两个相同的散列值，通常这也成为**哈希冲突**。Java在解决哈希冲突上，使用了一种叫做分离链接法的方法。
+
+>分离链接法将拥有相同哈希值的所有元素保存到同一个单向链表中，所以这种散列表整体上是一个数组，数组里面存放的元素时单向链表。
+
+<img src="https://github.com/guoxiaoxing/data-structure-and-algorithm/raw/master/art/hash/hash_conflict.png"/>
+
+这样方法有个叫负载因子的概念，负载因子 = 元素个数 / 散列表大小.
+
+负载因子是空间利用率与查找效率的一种平衡。
+
+- 负载因子越大表示散列表装填程度越高，空间利用率越高，但对应的查找效率就越低。
+- 负载因子越小表示散列表装填程度越低，空间利用率越低，但对应的查找效率就越高。
+
+Java集合里的HashMap就使用了这种方法，我们会在下面的HashMap源码分析了详细讨论这种方法的实现。
+
+## 二 散列的操作与源码实现
+
+### 2.1 HashMap/HashSet的实现原理
+
+>HashMap基于数组实现，数组里的元素是一个单向链表。
+
+<img src="https://github.com/guoxiaoxing/data-structure-and-algorithm/raw/master/art/hash/HashMap_class.png"/>
+
+HashMap具有以下特点：
+
+- 基于数组实现，数组里的元素是一个单向链表。
+- 键不可以重复，值可以重复，键、值都可以为null
+- 非线程安全
+
+HashMap实现了以下接口：
+
+- Map：以键值对的形式存取元素
+- Cloneable：可以被克隆
+- Serializable：可以序列化
+
+#### 成员变量
+
+```java
+//初始同乐，初始容量必须为2的n次方
+static final int DEFAULT_INITIAL_CAPACITY = 4;
+
+//最大容量为2的30次方
+static final int MAXIMUM_CAPACITY = 1 << 30;
+
+//默认负载因子为0.75f
+static final float DEFAULT_LOAD_FACTOR = 0.75f;
+
+//默认的空表
+static final HashMapEntry<?,?>[] EMPTY_TABLE = {};
+
+//存储元素的表
+transient HashMapEntry<K,V>[] table = (HashMapEntry<K,V>[]) EMPTY_TABLE;
+
+//集合大小
+transient int size;
+
+//下次扩容阈值，size > threshold就会进行扩容，扩容阈值 = 容量 * 负载因子。
+int threshold;
+
+//加载因此
+final float loadFactor = DEFAULT_LOAD_FACTOR;
+
+//修改次数
+transient int modCount;
+```
+
+从这个结构transient HashMapEntry<K,V>[] table = (HashMapEntry<K,V>[]) EMPTY_TABLE可以看出，**HashMap基于数组实现，数组里的元素是一个单向链表**。
+HashMap使用哈希算法将key散列成一个int值，这个值就对应了这个数组的下标，所以你可以知道，如果两个key的哈希值相等，则它们会被放在当前下表的单向链表中。
+
+这里我们着重介绍一下负载因子，它是空间利用率与查找效率的一种平衡。
+
+- 负载因子越大表示散列表装填程度越高，空间利用率越高，但对应的查找效率就越低。
+- 负载因子越小表示散列表装填程度越低，空间利用率越低，但对应的查找效率就越高。
+
+#### 内部类
+
+```java
+static class HashMapEntry<K,V> implements Map.Entry<K,V> {
+        //键
+        final K key;
+        //值
+        V value;
+        //后继的引用
+        HashMapEntry<K,V> next;
+        //哈希值
+        int hash;
+
+        HashMapEntry(int h, K k, V v, HashMapEntry<K,V> n) {
+            value = v;
+            next = n;
+            key = k;
+            hash = h;
+        }
+
+        public final K getKey() {
+            return key;
+        }
+
+        public final V getValue() {
+            return value;
+        }
+
+        public final V setValue(V newValue) {
+            V oldValue = value;
+            value = newValue;
+            return oldValue;
+        }
+
+        public final boolean equals(Object o) {
+            if (!(o instanceof Map.Entry))
+                return false;
+            Map.Entry e = (Map.Entry)o;
+            Object k1 = getKey();
+            Object k2 = e.getKey();
+            if (k1 == k2 || (k1 != null && k1.equals(k2))) {
+                Object v1 = getValue();
+                Object v2 = e.getValue();
+                if (v1 == v2 || (v1 != null && v1.equals(v2)))
+                    return true;
+            }
+            return false;
+        }
+
+        public final int hashCode() {
+            return Objects.hashCode(getKey()) ^ Objects.hashCode(getValue());
+        }
+
+        public final String toString() {
+            return getKey() + "=" + getValue();
+        }
+
+        //当向HashMao里添加元素时调用此方法，这里提供给子类实现
+        void recordAccess(HashMap<K,V> m) {
+        }
+
+        //当从HashM里删除元素时调用此方法，这里提供给子类实现
+        void recordRemoval(HashMap<K,V> m) {
+        }
+    }
+```
+HashMapEntry用来描述HashMao里的元素，它保存了键、值、后继的引用与哈希值。
+
+#### 构造方法
+
+```java
+
+//提供初始容量和负载因子进行构造
+public HashMap(int initialCapacity, float loadFactor) {
+    if (initialCapacity < 0)
+        throw new IllegalArgumentException("Illegal initial capacity: " +
+                                           initialCapacity);
+    if (initialCapacity > MAXIMUM_CAPACITY) {
+        initialCapacity = MAXIMUM_CAPACITY;
+    } else if (initialCapacity < DEFAULT_INITIAL_CAPACITY) {
+        initialCapacity = DEFAULT_INITIAL_CAPACITY;
+    }
+
+    if (loadFactor <= 0 || Float.isNaN(loadFactor))
+        throw new IllegalArgumentException("Illegal load factor: " +
+                                           loadFactor);
+    // Android-Note: We always use the default load factor of 0.75f.
+
+    // This might appear wrong but it's just awkward design. We always call
+    // inflateTable() when table == EMPTY_TABLE. That method will take "threshold"
+    // to mean "capacity" and then replace it with the real threshold (i.e, multiplied with
+    // the load factor).
+    threshold = initialCapacity;
+    init();
+}
+
+//提供初始容量进行构造
+public HashMap(int initialCapacity) {
+    this(initialCapacity, DEFAULT_LOAD_FACTOR);
+}
+
+//空构造方法
+public HashMap() {
+    this(DEFAULT_INITIAL_CAPACITY, DEFAULT_LOAD_FACTOR);
+}
+
+//提供一个Map进行构造
+public HashMap(Map<? extends K, ? extends V> m) {
+    this(Math.max((int) (m.size() / DEFAULT_LOAD_FACTOR) + 1,
+                  DEFAULT_INITIAL_CAPACITY), DEFAULT_LOAD_FACTOR);
+    inflateTable(threshold);
+
+    putAllForCreate(m);
+}
+```
+
+#### 操作方法
+
+##### put
+
+```java
+public class HashMap<K,V>
+    extends AbstractMap<K,V>
+    implements Map<K,V>, Cloneable, Serializable{
+    
+    public V put(K key, V value) {
+        if (table == EMPTY_TABLE) {
+            inflateTable(threshold);
+        }
+        if (key == null)
+            //如果key为null，则将其放在table[0]的位置
+            return putForNullKey(value);
+        //根据key计算hash值
+        int hash = sun.misc.Hashing.singleWordWangJenkinsHash(key);
+        //根据hash值和数组容量，找到索引值
+        int i = indexFor(hash, table.length);
+        //遍历table[i]位置的链表，查找相同的key，若找到则则用新的value替换掉oldValue
+        for (HashMapEntry<K,V> e = table[i]; e != null; e = e.next) {
+            Object k;
+            if (e.hash == hash && ((k = e.key) == key || key.equals(k))) {
+                V oldValue = e.value;
+                e.value = value;
+                e.recordAccess(this);
+                return oldValue;
+            }
+        }
+
+        modCount++;
+        //若没有查找到相同的key，则添加key到table[i]位置，新添加的元素总是添加在单向链表的表头位置，后面的元素称为它的后继
+        addEntry(hash, key, value, i);
+        return null;
+    }
+    
+    //根据哈希值与数组容量计算索引位置，使用&代替取模，提升效率。
+    static int indexFor(int h, int length) {
+        // assert Integer.bitCount(length) == 1 : "length must be a non-zero power of 2";
+        return h & (length-1);
+    }
+    
+    void addEntry(int hash, K key, V value, int bucketIndex) {
+        //如果达到了扩容阈值，则进行扩容，容量翻倍
+        if ((size >= threshold) && (null != table[bucketIndex])) {
+            resize(2 * table.length);
+            hash = (null != key) ? sun.misc.Hashing.singleWordWangJenkinsHash(key) : 0;
+            bucketIndex = indexFor(hash, table.length);
+        }
+
+        createEntry(hash, key, value, bucketIndex);
+    }
+
+    //新添加的元素总是添加在单向链表的表头位置，后面的元素称为它的后继
+    void createEntry(int hash, K key, V value, int bucketIndex) {
+        HashMapEntry<K,V> e = table[bucketIndex];
+        table[bucketIndex] = new HashMapEntry<>(hash, key, value, e);
+        size++;
+    }
+}
+```
+这个添加的流程还是比较简单的，这个流程如下：
+
+1. 根据key计算hash值，并根据hash值和数组容量，找到索引值，该位置即为存储该元素的链表所在处。
+2. 遍历table[i]位置的链表，查找相同的key，若找到则则用新的value替换掉oldValue.
+3. 若没有查找到相同的key，则添加key到table[i]位置，新添加的元素总是添加在单向链表的表头位置，后面的元素称为它的后继。
+
+这里你可以看到HashMap使用了我们上面所说的分离链接法来解决哈希冲突的问题。
+
+##### remove
+
+```java
+public class HashMap<K,V>
+    extends AbstractMap<K,V>
+    implements Map<K,V>, Cloneable, Serializable{
+    
+    public V remove(Object key) {
+        Entry<K,V> e = removeEntryForKey(key);
+        return (e == null ? null : e.getValue());
+    }
+
+    final Entry<K,V> removeEntryForKey(Object key) {
+        if (size == 0) {
+            return null;
+        }
+        //计算哈希值，根据哈希值与数组容量计算它所在的索引，根据索引查找它所在的链表
+        int hash = (key == null) ? 0 : sun.misc.Hashing.singleWordWangJenkinsHash(key);
+        int i = indexFor(hash, table.length);
+        HashMapEntry<K,V> prev = table[i];
+        HashMapEntry<K,V> e = prev;
+
+        //从起始节点开始遍历，查找要删除的元素，删除该节点，将节点的后继添加为它前驱的后继
+        while (e != null) {
+            HashMapEntry<K,V> next = e.next;
+            Object k;
+            if (e.hash == hash &&
+                ((k = e.key) == key || (key != null && key.equals(k)))) {
+                modCount++;
+                size--;
+                if (prev == e)
+                    table[i] = next;
+                else
+                    prev.next = next;
+                e.recordRemoval(this);
+                return e;
+            }
+            prev = e;
+            e = next;
+        }
+
+        return e;
+    }
+}
+```
+
+删除的流程如下所示：
+
+1. 计算哈希值，根据哈希值与数组容量计算它所在的索引，根据索引查找它所在的链表。
+2. 从起始节点开始遍历，查找要删除的元素，删除该节点，将节点的后继添加为它前驱的后继
+
+##### get
+
+
+```java
+public class HashMap<K,V>
+    extends AbstractMap<K,V>
+    implements Map<K,V>, Cloneable, Serializable{
+    
+   public V get(Object key) {
+       if (key == null)
+           return getForNullKey();
+       Entry<K,V> entry = getEntry(key);
+
+       return null == entry ? null : entry.getValue();
+   }
+   
+   final Entry<K,V> getEntry(Object key) {
+       if (size == 0) {
+           return null;
+       }
+       //计算哈希值，根据哈希值与数组容量计算它所在的索引，根据索引查找它所在的链表
+       int hash = (key == null) ? 0 : sun.misc.Hashing.singleWordWangJenkinsHash(key);
+       //在单向链表中查找该元素
+       for (HashMapEntry<K,V> e = table[indexFor(hash, table.length)];
+            e != null;
+            e = e.next) {
+           Object k;
+           if (e.hash == hash &&
+               ((k = e.key) == key || (key != null && key.equals(k))))
+               return e;
+       }
+       return null;
+   }
+
+}
+```
+
+查找的流程也十分简单，具体如下：
+
+1. 计算哈希值，根据哈希值与数组容量计算它所在的索引，根据索引查找它所在的链表。
+2. 在单向链表中查找该元素
+
+##### put
+
+
+```java
+public class HashMap<K,V>
+    extends AbstractMap<K,V>
+    implements Map<K,V>, Cloneable, Serializable{
+    
+}
+```
