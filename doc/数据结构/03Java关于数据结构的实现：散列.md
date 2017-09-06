@@ -52,7 +52,7 @@
 
 >分离链接法将拥有相同哈希值的所有元素保存到同一个单向链表中，所以这种散列表整体上是一个数组，数组里面存放的元素时单向链表。
 
-<img src="https://github.com/guoxiaoxing/data-structure-and-algorithm/raw/master/art/hash/hash_conflict.png"/>
+<img src="https://github.com/guoxiaoxing/data-structure-and-algorithm/raw/master/art/hash/hash_conflict.png" width="800"/>
 
 这样方法有个叫负载因子的概念，负载因子 = 元素个数 / 散列表大小.
 
@@ -69,7 +69,7 @@ Java集合里的HashMap就使用了这种方法，我们会在下面的HashMap�
 
 >HashMap基于数组实现，数组里的元素是一个单向链表。
 
-<img src="https://github.com/guoxiaoxing/data-structure-and-algorithm/raw/master/art/hash/HashMap_class.png"/>
+<img src="https://github.com/guoxiaoxing/data-structure-and-algorithm/raw/master/art/hash/HashMap_class.png" width="800"/>
 
 HashMap具有以下特点：
 
