@@ -1,4 +1,4 @@
-# Java关于数据结构的实现：树
+# Java关于数据结构的实现：散列
 
 **关于作者**
 
@@ -400,14 +400,3 @@ public class HashMap<K,V>
 
 1. 计算哈希值，根据哈希值与数组容量计算它所在的索引，根据索引查找它所在的链表。
 2. 在单向链表中查找该元素
-
-##### put
-
-
-```java
-public class HashMap<K,V>
-    extends AbstractMap<K,V>
-    implements Map<K,V>, Cloneable, Serializable{
-    
-}
-```
