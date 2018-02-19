@@ -1,4 +1,4 @@
-package com.guoxiaoxing.algorithm.demo;
+package com.guoxiaoxing.algorithm.list;
 
 import org.junit.Test;
 
