@@ -3,6 +3,7 @@ package com.guoxiaoxing.algorithm.list;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * For more information, you can visit https://github.com/guoxiaoxing or contact me by
@@ -54,6 +55,5 @@ public class ListDemo {
         long linkedListIRemoveEnd = System.currentTimeMillis();
         System.out.println("LinkedList remove end: " + linkedListIRemoveEnd);
         System.out.println("LinkedList remove cost time: " + (linkedListIRemoveEnd - linkedListIRemoveBegin));
-
     }
 }
