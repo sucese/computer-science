@@ -11,8 +11,8 @@ public class SortDemo {
 
     public static void main(String[] args) {
 
-        int[] origin = {1, 3, 5, 4, 6, 2};
-        mergeSort(origin, 0, origin.length - 1);
+        int[] origin = {3, 1, 5, 4, 6, 2};
+        fastSort(origin, 0, origin.length - 1);
         for (int i = 0; i < origin.length; i++) {
             System.out.println(origin[i]);
         }
@@ -94,8 +94,37 @@ public class SortDemo {
         }
     }
 
-    public static void fastSort(){
+    private static void fastSort(int[] origin, int left, int right) {
 
+        if (origin == null || origin.length == 0) {
+            return;
+        }
+
+        if (left >= right) {
+            return;
+        }
+
+        int middle = getMiddle(origin, left, right);
+        fastSort(origin, left, middle - 1);
+        fastSort(origin, middle + 1, right);
+    }
+
+    private static int getMiddle(int[] origin, int left, int right) {
+        int baseNumber = origin[left];
+        while (left < right) {
+            // right指针先移动，寻找比temp小的元素
+            while (left < right && origin[right] > baseNumber) {
+                right--;
+            }
+            origin[left] = origin[right];
+            // left指针接着移动，寻找比temp大的元素
+            while (left < right && origin[left] < baseNumber) {
+                left++;
+            }
+            origin[right] = origin[left];
+        }
+        origin[left] = baseNumber;
+        return left;
     }
 
 }
