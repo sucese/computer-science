@@ -8,7 +8,6 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/algorithm" />
             <option value="$PROJECT_DIR$/demo" />
           </set>
         </option>
