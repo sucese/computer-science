@@ -12,7 +12,7 @@ public class SortDemo {
     public static void main(String[] args) {
 
         int[] origin = {3, 1, 5, 4, 6, 2};
-        fastSort(origin, 0, origin.length - 1);
+        mergeSort(origin, 0, origin.length - 1);
         for (int i = 0; i < origin.length; i++) {
             System.out.println(origin[i]);
         }
@@ -41,56 +41,43 @@ public class SortDemo {
         }
     }
 
-    private static void mergeSort(int[] origin, int low, int high) {
+    private static void mergeSort(int[] origin, int left, int right) {
         if (origin == null || origin.length == 0) {
             return;
         }
-
-        if (low >= high) {
+        if (left >= right) {
             return;
         }
-
-        int middle = (low + high) / 2;
-        // 左边子列排序
-        mergeSort(origin, low, middle);
-        // 右边子列排序
-        mergeSort(origin, middle + 1, high);
-        // 合并左右子列
-        merge(origin, low, middle, high);
+        int middle = (right - left) / 2;
+        mergeSort(origin, left, middle);
+        mergeSort(origin, middle + 1, right);
+        merge(origin, left, middle, right);
     }
 
-    private static void merge(int[] origin, int low, int middle, int high) {
-        // 左子列游标
-        int leftIndex = low;
-        // 右子列游标
-        int rightIndex = middle + 1;
-        // 临时数组
-        int temp = 0;
-        int[] tempOrigin = new int[high - low + 1];
+    private static void merge(int[] origin, int left, int middle, int right) {
+        int tempIndex = 0;
+        int[] tempOrigin = new int[right - left + 1];
+        int leftIndex = left;
+        int rightIndex = middle;
 
-        while (leftIndex <= middle && rightIndex <= high) {
-            // 先把较小的元素放在临时数组中
-            if (origin[leftIndex] < origin[rightIndex]) {
-                tempOrigin[temp++] = origin[leftIndex++];
-            } else {
-                tempOrigin[temp++] = origin[rightIndex++];
+        while (leftIndex < middle && rightIndex < right){
+            if(origin[leftIndex++] < origin[rightIndex++]){
+                tempOrigin[tempIndex++] = origin[leftIndex++];
+            }else {
+                tempOrigin[tempIndex++] = origin[rightIndex++];
             }
+        }
 
-            // 将剩余左边子列的元素放到临时数组中
-            while (leftIndex <= middle) {
-                tempOrigin[temp++] = origin[leftIndex++];
-            }
+        while (leftIndex < middle){
+            tempOrigin[tempIndex++] = origin[leftIndex++];
+        }
 
+        while (rightIndex < right){
+            tempOrigin[tempIndex++] = origin[rightIndex++];
+        }
 
-            // 将剩余右边子列的元素放到临时数组中
-            while (rightIndex <= high) {
-                tempOrigin[temp++] = origin[rightIndex++];
-            }
-
-            // 用临时数组覆盖原来的数组
-            for (int i = 0; i < tempOrigin.length; i++) {
-                origin[i + low] = tempOrigin[i];
-            }
+        for(int i = 0; i < tempOrigin.length; i++){
+            origin[i] = tempOrigin[i];
         }
     }
 
