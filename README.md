@@ -1,4 +1,4 @@
-# <img src="https://github.com/guoxiaoxing/computer-science/raw/master/art/logo.png" alt="Phoenix" width="40" height="40" align="bottom" /> Data Structure And Algorithm
+# <img src="https://github.com/guoxiaoxing/computer-science/raw/master/art/logo.png" alt="Computer Science" width="40" height="40" align="bottom" /> Computer Science
 
 ## 功能介绍
 
