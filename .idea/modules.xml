@@ -5,7 +5,6 @@
       <module fileurl="file://$PROJECT_DIR$/computer-science.iml" filepath="$PROJECT_DIR$/computer-science.iml" />
       <module fileurl="file://$PROJECT_DIR$/data-structure-and-algorithm.iml" filepath="$PROJECT_DIR$/data-structure-and-algorithm.iml" />
       <module fileurl="file://$PROJECT_DIR$/demo/demo.iml" filepath="$PROJECT_DIR$/demo/demo.iml" />
-      <module fileurl="file://$PROJECT_DIR$/demo/demo.iml" filepath="$PROJECT_DIR$/demo/demo.iml" />
     </modules>
   </component>
 </project>
